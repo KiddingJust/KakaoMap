@@ -11,4 +11,14 @@ public class MapController {
 		
 	}
 	
+	@GetMapping("/map2")
+	public void map2() {
+		
+	}
+	
+	@GetMapping("/map3")
+	public void map3() {
+		
+	}
+	
 }

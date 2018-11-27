@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
-</head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    </head>
 
 <style>
     .wrapper{
@@ -23,6 +24,22 @@
     .listUL li{
         border: 1px solid white;
     }
+
+
+.tracker {
+    position: absolute;
+    display: none;
+    cursor: pointer;
+    z-index: 1;
+}
+
+.glyphicon {
+    position: absolute;
+	font-size:35px;
+	color:red;
+}
+
+    
 </style>
 
 <body>
@@ -57,18 +74,39 @@
 <script>
 $(document).ready(function(){
 	
+    
+    function setVisible(visible) {
+        tracker.style.display = visible ? 'block' : 'none';
+    }
+    
+    // trakcer 엘리먼트
+    var tracker = document.createElement('div');
+    tracker.className = 'tracker';
+
+    // 중심 좌표 아이콘
+    var icon = document.createElement('span');
+    icon.className = 'glyphicon glyphicon-map-marker';
+
+    // html에 추가
+    tracker.appendChild(icon);
+    map.getNode().appendChild(tracker);
 	
-	var bound = map.getBounds();
-	console.log(bound);
-	
-	
+	var proj = map.getProjection();	
+    var center = proj.containerPointFromCoords(map.getCenter());
+	console.log("center: " + center);
+    
+	// tracker 중심 위치 설정
+    tracker.style.top = center.y + 'px';
+    tracker.style.left = center.x + 'px';
+    
+    // 일단 안 보이도록. 
+	setVisible(false);
+    
 	var listUL = $(".listUL");
 	var marker;
 	var markers = [];
 	var iwRemoveable = true;
 	var infowindows = [];
-	
-
 	
     //가게를 가지고 오면, 루프를 통해 listUL에 뿌려줌
     dao.getList(function(stores){
@@ -96,28 +134,9 @@ $(document).ready(function(){
     });
     
  
-    //드래그 중 이벤트 
-    daum.maps.event.addListener(map, 'drag', function() {
-        var latlng = map.getCenter();
-
-        console.log(latlng.jb);
-        
-        var imageSrc = 'http://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png', // 마커이미지의 주소입니다    
-        imageSize = new daum.maps.Size(64, 69), // 마커이미지의 크기입니다
-        imageOption = {offset: new daum.maps.Point(27, 69)}; // 마커이미지의 옵션입니다. 마커의 좌표와 일치시킬 이미지 안에서의 좌표를 설정합니다.
-          
-	    // 마커의 이미지정보를 가지고 있는 마커이미지를 생성합니다
-	    var markerImage = new daum.maps.MarkerImage(imageSrc, imageSize, imageOption),
-	        markerPosition = new daum.maps.LatLng(latlng.jb, latlng.ib); // 마커가 표시될 위치입니다
-	
-	    // 마커를 생성합니다
-	    var marker = new daum.maps.Marker({
-	        position: markerPosition, 
-	        image: markerImage // 마커이미지 설정 
-	    });
-	        
-	    marker.setMap(map);  
-
+    //드래그 중 이벤트 (중심 좌표 이미지 나타나도록 설정)
+    daum.maps.event.addListener(map, 'drag', function() {	        
+		setVisible(true);
     });
     
     //드래그&드랍 시 중심에 가까운 가게 불러오기
@@ -146,7 +165,8 @@ $(document).ready(function(){
         
 	    	iwPosition = new daum.maps.LatLng(nnstore[i].lat, nnstore[i].lng);
 	    	iwContent = '<div style="padding:5px;">' + nnstore[i].title + '<br><a href="http://map.daum.net/link/to/' + nnstore[i].title + ',' + nnstore[i].lat + ',' + nnstore[i].lng + '" style="color:blue" target="_blank">길찾기</a></div>';
-	    	// 인포윈도우를 생성하고 지도에 표시합니다
+	    	
+	    	// 인포윈도우를 생성하고 지도에 표시
 	    	var infowindow = new daum.maps.InfoWindow({
 	    	    position : iwPosition, 
 	    	    content : iwContent,
@@ -157,7 +177,7 @@ $(document).ready(function(){
 			markers.push(marker);
 			
 		    daum.maps.event.addListener(marker, 'click', makeClickListener(map, markers[i], infowindow));
-
+			setVisible(false);
         }; //for end    
     }); //drag&drop end
         
