@@ -25,7 +25,6 @@
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=dc56ff6a9fc8065d98b43e87a79e20a4&libraries=services"></script>
 <script>
 // 마커를 클릭하면 장소명을 표출할 인포윈도우 입니다
-var infowindow = new daum.maps.InfoWindow({zIndex:1});
 
 var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
     mapOption = {
@@ -39,29 +38,12 @@ var map = new daum.maps.Map(mapContainer, mapOption);
 // 장소 검색 객체를 생성합니다
 var ps = new daum.maps.services.Places(); 
 
+// 지도 확대 축소를 제어할 수 있는  줌 컨트롤을 생성합니다
+var zoomControl = new daum.maps.ZoomControl();
+map.addControl(zoomControl, daum.maps.ControlPosition.RIGHT);
 
 
-/* //키워드 검색 완료 시 호출되는 콜백함수 입니다
-function placesSearchCB (nnstore, status, pagination) {
-    if (status === daum.maps.services.Status.OK) {
 
-		 latlng = map.getCenter();
-		 console.log(latlng);
-	     //자바스크립트 객체 만들기.가까운 곳 찾는 것
-		 nnstore = dao.findNNStore({lat:latlng.jb, lng:latlng.ib});
-	     
-	     // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
-        // LatLngBounds 객체에 좌표를 추가합니다
-        var bounds = new daum.maps.LatLngBounds();
-		console.log(data);
-        for (var i=0; i<5; i++) {
-            bounds.extend(new daum.maps.LatLng(data[i].y, data[i].x));
-        }       
-
-        // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
-        map.setBounds(bounds);
-    } 
-} */
 </script>
 <script src = "../js/store.js"></script>
 <script src="/webjars/jquery/3.3.1/jquery.min.js"></script>
