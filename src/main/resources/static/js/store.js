@@ -14,8 +14,14 @@ var dao = (function (map){
         {title:'에머이',lat:37.570031,lng:126.984601},
         {title:'쿠킨스테이크',lat:37.569934,lng:126.985787},
         {title:'서브웨이',lat:37.570325,lng:126.985932},
-        
-        {title:'미스터시래기',lat:37.573029,lng:126.985420}
+        {title:'미스터시래기',lat:37.573029,lng:126.985420},
+        {title: '종로설렁탕', lat:37.570130,lng:126.989828},
+        {title: '휘황', lat:37.570198,lng:126.990204},
+        {title: '미다래', lat:37.570836,lng:126.991599},
+        {title: '한일식당', lat:37.570028,lng:126.991159},
+        {title: '시민식당', lat:37.570921,lng:126.990375},
+        {title: '새마을식당', lat:37.569935,lng:126.988884},
+        {title: '종로돈까스', lat:37.570611,lng:126.990032},
     ];
 
     //마커 지우는 역할
@@ -47,7 +53,6 @@ var dao = (function (map){
             var d2 = calcDistance(current, b) * 1000000;
             return d1 - d2;
         });
-        console.log(target);
         return target;
     }
 
