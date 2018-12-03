@@ -21,4 +21,9 @@ public class MapController {
 		
 	}
 	
+	@GetMapping("/map4")
+	public void map4() {
+		
+	}
+	
 }

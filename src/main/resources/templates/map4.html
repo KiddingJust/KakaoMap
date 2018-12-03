@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>키워드로 장소검색하기</title>
+    
+<style>
+	.search{
+		width: 350px;
+		height: 3vh;
+	}
+	#searchBtn{
+		background-color: white;
+		font-weight:bold;
+		height: 3.5vh;
+	}
+</style>
+</head>
+<body>
+<div id="map" style="width:100%;height:350px;"></div>
+<div>
+	<input type="text" class="search" value="" placeholder="원하는 장소를 입력하세요(주소, 건물명, 역명 등)"> 
+	<button id="searchBtn">검색</button>
+</div>
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=dc56ff6a9fc8065d98b43e87a79e20a4&libraries=services"></script>
+<script>
+// 마커를 클릭하면 장소명을 표출할 인포윈도우 입니다
+var infowindow = new daum.maps.InfoWindow({zIndex:1});
+
+var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+    mapOption = {
+        center: new daum.maps.LatLng(37.566826, 126.9786567), // 지도의 중심좌표
+        level: 3 // 지도의 확대 레벨
+    };  
+
+// 지도를 생성합니다    
+var map = new daum.maps.Map(mapContainer, mapOption); 
+
+// 장소 검색 객체를 생성합니다
+var ps = new daum.maps.services.Places(); 
+
+
+
+/* //키워드 검색 완료 시 호출되는 콜백함수 입니다
+function placesSearchCB (nnstore, status, pagination) {
+    if (status === daum.maps.services.Status.OK) {
+
+		 latlng = map.getCenter();
+		 console.log(latlng);
+	     //자바스크립트 객체 만들기.가까운 곳 찾는 것
+		 nnstore = dao.findNNStore({lat:latlng.jb, lng:latlng.ib});
+	     
+	     // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
+        // LatLngBounds 객체에 좌표를 추가합니다
+        var bounds = new daum.maps.LatLngBounds();
+		console.log(data);
+        for (var i=0; i<5; i++) {
+            bounds.extend(new daum.maps.LatLng(data[i].y, data[i].x));
+        }       
+
+        // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+        map.setBounds(bounds);
+    } 
+} */
+</script>
+<script src = "../js/store.js"></script>
+<script src="/webjars/jquery/3.3.1/jquery.min.js"></script>
+
+<script>
+$(document).ready(function(){
+
+	var marker;
+	var markers = [];
+	var iwRemoveable = true;
+	var infowindows = [];
+	
+	 var iwPosition;
+	 var iwContent;
+	 var infowindow;	 
+	 var latlng;
+	 var nnstore;
+	 
+	var searchBtn = $("#searchBtn");
+	searchBtn.on("click", function(){
+		var searchInput = $(".search");
+		console.log(searchInput.val());
+		ps.keywordSearch(searchInput.val(), placesSearchCB); 
+		console.log(map.getCenter());
+    	
+		searchInput.val("");
+	});
+
+
+	//키워드 검색 완료 시 호출되는 콜백함수 입니다
+	function placesSearchCB (data, status, pagination) {
+	    if (status === daum.maps.services.Status.OK) {
+		     
+	        // LatLngBounds 객체에 좌표를 추가합니다
+	        var bounds = new daum.maps.LatLngBounds();
+			
+	        for (var i=0; i<data.length; i++) {
+	            bounds.extend(new daum.maps.LatLng(data[i].y, data[i].x));
+	        }       
+	        // 검색된 장소 위치를 기준으로 지도 범위를 재설정합니다
+	        map.setBounds(bounds);
+
+	    	//생성되어있는 마커 지우기 + 마커 담은 배열 초기화시키기
+	    	for (var i = 0; i < markers.length; i++){
+	    		markers[i].setMap(null);
+	    	};
+	    	markers = [];
+	    	
+	        console.log((bounds.da+bounds.ia)/2);
+	        console.log((bounds.ka+bounds.ja)/2);
+	        
+			 nnstore = dao.findNNStore({lat:(bounds.ka+bounds.ja)/2, lng:(bounds.da+bounds.ia)/2});
+				
+			 for(var i = 0; i < 10; i++) {
+				 marker = new daum.maps.Marker({
+					 position: new daum.maps.LatLng(nnstore[i].lat, nnstore[i].lng),
+					 clickable: true
+				 });
+				 iwPosition = new daum.maps.LatLng(nnstore[i].lat, nnstore[i].lng);
+				 iwContent = '<div style="padding:5px;">' + nnstore[i].title + '<br><a href="http://map.daum.net/link/to/' + nnstore[i].title + ',' + nnstore[i].lat + ',' + nnstore[i].lng + '" style="color:blue" target="_blank">길찾기</a></div>';
+			    	
+			    	// 인포윈도우를 생성하고 지도에 표시
+			    	infowindow = new daum.maps.InfoWindow({
+			    	    position : iwPosition, 
+			    	    content : iwContent,
+			    	    removable : iwRemoveable
+		    	});
+		    	
+		    	marker.setMap(map);
+				markers.push(marker);
+			    daum.maps.event.addListener(marker, 'click', makeClickListener(map, markers[i], infowindow));
+		    }; //for end    
+	    }; 
+	};
+	
+	 //초기 마커 불러오기 위한 함수
+	function markerVisible(){	 
+		 // 지도 중심좌표를 얻어옵니다
+		 latlng = map.getCenter();
+		 console.log(latlng);
+	     //자바스크립트 객체 만들기.가까운 곳 찾는 것
+		 nnstore = dao.findNNStore({lat:latlng.jb, lng:latlng.ib});
+	
+		 for(var i = 0; i < 10; i++) {
+			 marker = new daum.maps.Marker({
+				 position: new daum.maps.LatLng(nnstore[i].lat, nnstore[i].lng),
+				 clickable: true
+			 });
+			 iwPosition = new daum.maps.LatLng(nnstore[i].lat, nnstore[i].lng);
+			 iwContent = '<div style="padding:5px;">' + nnstore[i].title + '<br><a href="http://map.daum.net/link/to/' + nnstore[i].title + ',' + nnstore[i].lat + ',' + nnstore[i].lng + '" style="color:blue" target="_blank">길찾기</a></div>';
+		    	
+		    	// 인포윈도우를 생성하고 지도에 표시
+		    	infowindow = new daum.maps.InfoWindow({
+		    	    position : iwPosition, 
+		    	    content : iwContent,
+		    	    removable : iwRemoveable
+	    	});
+	    	
+	    	marker.setMap(map);
+			markers.push(marker);
+		    daum.maps.event.addListener(marker, 'click', makeClickListener(map, markers[i], infowindow));
+	    }; //for end    
+	 };
+	 
+
+    //드래그&드랍 시 중심에 가까운 가게 불러오기
+    daum.maps.event.addListener(map, 'dragend', function() {
+     
+    	//생성되어있는 마커 지우기 + 마커 담은 배열 초기화시키기
+    	for (var i = 0; i < markers.length; i++){
+    		markers[i].setMap(null);
+    	};
+    	markers = [];
+   	 	markerVisible();
+
+    });//drag&drop end
+        
+	// 인포윈도우 표시하는 클로저를 만드는 함수
+	function makeClickListener(map, marker, infowindow) {
+	    return function() {
+
+		    infowindows.push(infowindow);
+		    
+		    if(infowindows.length >1 ){
+		    	infowindows[0].close();
+		    	infowindows.splice(0, 1);
+		    }
+	        infowindow.open(map, marker);
+	    };
+	}
+
+	
+});
+</script>
+</body>
+</html>
