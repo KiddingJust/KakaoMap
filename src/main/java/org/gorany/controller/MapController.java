@@ -26,4 +26,8 @@ public class MapController {
 		
 	}
 	
+	@GetMapping("/location")
+	public void location() {
+	}
+	
 }
